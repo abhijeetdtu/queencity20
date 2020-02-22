@@ -1,6 +1,7 @@
 import pandas as pd
 import pathlib
 import os
+from collections import defaultdict
 
 class Paths:
 
@@ -27,10 +28,33 @@ def getTrainingData():
     return df
 
 
+def getTestData():
+    df = pd.read_csv(getPathToDataFile(Paths.TESTING))
+    df = df.drop("Unnamed: 0" , axis=1)
+    return df
+
 def testTrainSplit(df , splitRatio = 0.77):
     from sklearn.model_selection import train_test_split
     df.columns
-    X = df.drop("target" , axis=1)
+    X = df.drop("target", axis=1)
     y = df["target"]
     #X_train, X_test, y_train, y_test =
     return train_test_split(X, y, test_size=1-splitRatio, random_state=42)
+
+
+def diffCols(df):
+    colsims = defaultdict(list)
+    for col in df:
+        if "_" in col:
+            pref = "_".join(col.split("_")[:-1])
+            colsims[pref].append(col)
+
+    for key,val in colsims.items():
+        if len(val) > 1:
+            df[f"{key}_min"] = df[val].min(axis=1)
+            df[f"{key}_max"] = df[val].max(axis=1)
+            df[f"{key}_mean"] = df[val].mean(axis=1)
+            df = df.drop(val , axis=1)
+
+    len(df.columns)
+    return df
