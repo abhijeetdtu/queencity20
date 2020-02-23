@@ -3,8 +3,6 @@ import pathlib
 import os
 from collections import defaultdict
 
-import numpy as np
-
 class Paths:
 
     TRAINING = "training.csv"
@@ -43,24 +41,6 @@ def testTrainSplit(df , splitRatio = 0.77):
     #X_train, X_test, y_train, y_test =
     return train_test_split(X, y, test_size=1-splitRatio, random_state=42)
 
-#df = getTrainingData()
-#df = df.fillna(df.mean(skipna=True))
-
-def getTrend(x):
-    arr = x.values
-    updown = []
-    mags = []
-    for i,elem in enumerate(arr[:-1]):
-        diff = arr[i] - arr[i+1]
-        #x[f"{x.index[0]}_trend_mag_{i}_{i+1}"] = diff
-        #x[f"{x.index[0]}_trend_updown_{i}_{i+1}"] = 1 if diff > 0 else -1
-
-        updown.append(1 if diff > 0 else -1)
-        mags.append(diff)
-
-    x[f"{x.index[0]}_trend"] = np.sum(updown)
-    x[f"{x.index[0]}_trend_mag"] = np.sum(mags)
-    return x
 
 def diffCols(df):
     colsims = defaultdict(list)
@@ -68,13 +48,34 @@ def diffCols(df):
         if "_" in col:
             pref = "_".join(col.split("_")[:-1])
             colsims[pref].append(col)
+
     for key,val in colsims.items():
         if len(val) > 1:
-            #ndf = df.loc[:,val].apply(lambda x: getTrend(x), axis=1)
-            #ndf = ndf.drop(val , axis=1)
             df[f"{key}_min"] = df[val].min(axis=1)
             df[f"{key}_max"] = df[val].max(axis=1)
             df[f"{key}_mean"] = df[val].mean(axis=1)
+            df[f"{key}_std"] = df[val].std(axis=1)
             df = df.drop(val , axis=1)
-            #df = df.join(ndf)
+
+    len(df.columns)
+    return df
+
+df = getTrainingData()
+def yoyCols(df):
+    colsims = defaultdict(list)
+    for col in df:
+        if "_" in col:
+            pref = "_".join(col.split("_")[:-1])
+            colsims[pref].append(col)
+
+    for key,val in colsims.items():
+        if len(val) > 1:
+            diffs = []
+            for i,v in enumerate(val[:-1]):
+                (df[v]-df[val[i+1]]).min(axis=1)
+                df[f"{key}_max"] = df[val].max(axis=1)
+                df[f"{key}_mean"] = df[val].mean(axis=1)
+                df = df.drop(val , axis=1)
+
+    len(df.columns)
     return df

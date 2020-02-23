@@ -10,8 +10,9 @@ from collections import defaultdict
 df = getTrainingData()
 df.head()
 
+df = getTestData()
 df = diffCols(df)
-cols = ['target', 'Transit_Ridership_Total_mean', 'Transit_Ridership_Total_max',
+cols = [ 'Transit_Ridership_Total_mean', 'Transit_Ridership_Total_max',
        'Transit_Ridership_Total_min', 'Fire_Call_Rate_min',
        'Fire_Call_Rate_mean', 'Commercial_Construction_min',
        'Fire_Call_Rate_max', 'Property_Crime_Rate_min',
@@ -22,6 +23,9 @@ cols = ['target', 'Transit_Ridership_Total_mean', 'Transit_Ridership_Total_max',
        'Commercial_Construction_mean', 'Violent_Crime_Rate_min',
        'Commercial_Construction_Permitted_Units_mean']
 
+# for test data
+df = df[cols]
+df = df.fillna(df.mean(skipna=True))
 
 from plotnine import *
 
@@ -61,3 +65,4 @@ def score(model):
 
 
 score(svm)
+svm.predict(df)
